@@ -1004,15 +1004,15 @@ namespace RealtimeCSG
 		}
 		
 		static Rect lastGuiRect;
+		
 		public static Rect GetLastSceneGUIRect(EditModeSurface tool)
 		{
 			return lastGuiRect;
 		}
 		
 		static Vector2 scrollbarPosition = Vector2.zero;
-
-		 
 		static Rect sceneGUIRect = new Rect(0, 0, 232, 0);
+		
 		public static void OnSceneGUI(Rect windowRect, EditModeSurface tool)
 		{
 			CSG_GUIStyleUtility.InitStyles();
@@ -1035,6 +1035,9 @@ namespace RealtimeCSG
 			var currentArea = sceneGUIRect;
 			currentArea.y = y;
 			currentArea.height = height;
+
+			var popoutButtonArea = currentArea;
+			
 			
 			var boxArea = currentArea;
 			const int scrollbarWidth = 10;
@@ -1075,18 +1078,11 @@ namespace RealtimeCSG
 					GUI.EndScrollView(true);
 				}
 			}
+			
+			CSG_EditorGUIUtility.DrawPopOutButton(popoutButtonArea);
 
 			lastGuiRect = boxArea;
-						
-			var buttonArea = boxArea;
-			buttonArea.x += buttonArea.width - 17;
-			buttonArea.y += 2;
-			buttonArea.height = 13;
-			buttonArea.width = 13;
-			if (GUI.Button(buttonArea, GUIContent.none, "WinBtnClose"))
-				EditModeToolWindowSceneGUI.GetWindow();
-
-			TooltipUtility.SetToolTip(CSG_GUIStyleUtility.PopOutTooltip, buttonArea);
+			
 			switch (Event.current.GetTypeForControl(windowControlID))
 			{
 				case EventType.MouseDown:	{ if (boxArea.Contains(Event.current.mousePosition)) { GUIUtility.hotControl = windowControlID; GUIUtility.keyboardControl = windowControlID; Event.current.Use(); } break; }
