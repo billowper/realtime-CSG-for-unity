@@ -41,15 +41,8 @@ namespace RealtimeCSG
 
 						var currentArea = GUILayoutUtility.GetLastRect();
 						lastGuiRect = currentArea;
-
-						var buttonArea = currentArea;
-						buttonArea.x += buttonArea.width - 17;
-						buttonArea.y += 2;
-						buttonArea.height = 13;
-						buttonArea.width = 13;
-						if (GUI.Button(buttonArea, GUIContent.none, "WinBtnClose"))
-							EditModeToolWindowSceneGUI.GetWindow();
-						TooltipUtility.SetToolTip(CSG_GUIStyleUtility.PopOutTooltip, buttonArea);
+						
+						CSG_EditorGUIUtility.DrawPopOutButton(currentArea);
 
 						int controlID = GUIUtility.GetControlID(SceneViewMeshOverlayHash, FocusType.Keyboard, currentArea);
 						switch (Event.current.GetTypeForControl(controlID))

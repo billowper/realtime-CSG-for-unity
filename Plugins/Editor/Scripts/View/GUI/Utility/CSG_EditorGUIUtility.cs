@@ -10,6 +10,18 @@ namespace RealtimeCSG
 
 	internal static class CSG_EditorGUIUtility
 	{
+		public static void DrawPopOutButton(Rect currentArea)
+		{
+			var buttonArea = currentArea;
+			buttonArea.x += buttonArea.width - 19;
+			buttonArea.y += 2;
+			buttonArea.height = 18;
+			buttonArea.width = 18;
+			if (GUI.Button(buttonArea, new GUIContent("+")))
+				EditModeToolWindowSceneGUI.GetWindow();
+			TooltipUtility.SetToolTip(CSG_GUIStyleUtility.PopOutTooltip, buttonArea);
+		}
+		
 		public static bool PassThroughButton(bool passThrough, bool mixedValues)
 		{
 			CSG_GUIStyleUtility.InitStyles();
