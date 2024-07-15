@@ -91,6 +91,7 @@ namespace RealtimeCSG
 																					null);
 				}
 			}
+			
 
 			reflectionSucceeded =	s_RectSelectionID_field  != null &&
 									m_RectSelection_field    != null &&
@@ -118,16 +119,66 @@ namespace RealtimeCSG
 		// Update rectangle selection using reflection
 		// This is hacky & dangerous 
 		// LOOK AWAY NOW!
+		private static Rect boundingRect;
 		internal static void Update(SceneView sceneView)
 		{
 			InitReflectedData();
-			if (!reflectionSucceeded)
-			{
-				prevStartGUIPoint = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
-				prevMouseGUIPoint = prevStartGUIPoint;
-				prevStartScreenPoint = MathConstants.zeroVector2;
-				prevMouseScreenPoint = MathConstants.zeroVector2;
-				rectFoundGameObjects.Clear();
+			if (!reflectionSucceeded) {
+				if (EditModeManager.EditMode != ToolEditMode.Place) {
+					prevStartGUIPoint = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+					prevMouseGUIPoint = prevStartGUIPoint;
+					prevStartScreenPoint = MathConstants.zeroVector2;
+					prevMouseScreenPoint = MathConstants.zeroVector2;
+					rectFoundGameObjects.Clear();
+					return;
+				}
+				Event e = Event.current;
+				var id = GUIUtility.GetControlID(FocusType.Passive);
+				switch (e.GetTypeForControl(id)) {
+					case EventType.Layout:
+						HandleUtility.AddDefaultControl(id);
+						break;
+				}
+
+				if( e.button == 0 && (id == GUIUtility.hotControl || GUIUtility.hotControl == 0)) {
+					if( boundingRect.min != Vector2.zero && e.type == EventType.Repaint ) {
+						boundingRect.size = e.mousePosition - boundingRect.min;
+						if (boundingRect.size.x < 3 && boundingRect.size.y < 3) {
+							return;
+						}
+						GUIUtility.hotControl = id;
+						Ray ray = HandleUtility.GUIPointToWorldRay( boundingRect.min );
+						Vector3 posA = ray.origin + ray.direction;
+						ray = HandleUtility.GUIPointToWorldRay( boundingRect.min + (boundingRect.width*Vector2.right) );
+						Vector3 posB = ray.origin + ray.direction;
+						ray = HandleUtility.GUIPointToWorldRay( boundingRect.max );
+						Vector3 posC = ray.origin + ray.direction;
+						ray = HandleUtility.GUIPointToWorldRay( boundingRect.min + (boundingRect.height*Vector2.up) );
+						Vector3 posD = ray.origin + ray.direction;
+						Handles.DrawDottedLine( posA, posB, 5 );
+						Handles.DrawDottedLine( posB, posC, 5 );
+						Handles.DrawDottedLine( posC, posD, 5 );
+						Handles.DrawDottedLine( posD, posA, 5 );
+						var frustum = CameraUtility.GetCameraSubFrustumGUI(sceneView.camera, boundingRect);
+						
+						// Find all the brushes (and it's gameObjects) that are in the frustum
+						if (SceneQueryUtility.GetItemsInFrustum(frustum.Planes, rectFoundGameObjects)) {
+							Selection.objects = rectFoundGameObjects.ToArray();
+						} else {
+							Selection.objects = null;
+						}
+					}
+					if( e.type == EventType.MouseUp ) {
+						if (GUIUtility.hotControl == id) {
+							GUIUtility.hotControl = 0;
+							e.Use();
+						}
+						boundingRect.min = Vector2.zero;
+					} else if( e.type == EventType.MouseDown ) {
+						boundingRect.min = e.mousePosition;
+						boundingRect.size = Vector2.zero;
+					}
+				}
 				return;
 			}
 
