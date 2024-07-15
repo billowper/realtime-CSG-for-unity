@@ -408,6 +408,7 @@ namespace RealtimeCSG
 						Selection.activeTransform = null;
 					else
 						Selection.instanceIDs = selectedObjectsOnClick.ToArray();
+					Event.current.Use();
 				}
 			}
 			else
@@ -419,6 +420,7 @@ namespace RealtimeCSG
 					selectedObjectsOnClick.Add(instanceID);
 					Selection.instanceIDs = selectedObjectsOnClick.ToArray();
 					addedSelection = true;
+					Event.current.Use();
 				}
 			}
 			else
@@ -429,6 +431,7 @@ namespace RealtimeCSG
 					var instanceID = gameobject.GetInstanceID();
 					selectedObjectsOnClick.Remove(instanceID);
 					Selection.instanceIDs = selectedObjectsOnClick.ToArray();
+					Event.current.Use();
 					return;
 				}
 			}
@@ -436,6 +439,7 @@ namespace RealtimeCSG
 			{
 				Selection.activeGameObject = gameobject;
 				addedSelection = true;
+				Event.current.Use();
 			}
 
 			if (!addedSelection)
@@ -447,6 +451,7 @@ namespace RealtimeCSG
                         !ModelTraits.IsModelEditable(brush.ChildData.Model))
 						continue;
 					SelectionUtility.LastUsedModel = brush.ChildData.Model;
+					Event.current.Use();
 					break;
 				}
 			}
@@ -461,6 +466,7 @@ namespace RealtimeCSG
 						return;
 					SelectionUtility.LastUsedModel = brush.ChildData.Model;
 				}
+				Event.current.Use();
 			}
 		}
 #endregion
