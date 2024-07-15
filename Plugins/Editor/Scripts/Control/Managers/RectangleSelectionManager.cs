@@ -120,6 +120,8 @@ namespace RealtimeCSG
 		// This is hacky & dangerous 
 		// LOOK AWAY NOW!
 		private static Rect boundingRect;
+		private static bool mouseDown;
+		private static bool mouseDrag;
 		internal static void Update(SceneView sceneView)
 		{
 			InitReflectedData();
@@ -138,15 +140,55 @@ namespace RealtimeCSG
 					case EventType.Layout:
 						HandleUtility.AddDefaultControl(id);
 						break;
-				}
-
-				if( e.button == 0 && (id == GUIUtility.hotControl || GUIUtility.hotControl == 0)) {
-					if( boundingRect.min != Vector2.zero && e.type == EventType.Repaint ) {
+					case EventType.MouseDown:
+						if (e.button != 0 || GUIUtility.hotControl != 0) {
+							break;
+						}
+						mouseDown = true;
+						boundingRect.min = e.mousePosition;
+						boundingRect.size = Vector2.zero;
+						break;
+					case EventType.MouseUp:
+						mouseDown = false;
+						if (e.button != 0 || GUIUtility.hotControl != id) {
+							break;
+						}
+						mouseDrag = false;
+						GUIUtility.hotControl = 0;
+						boundingRect.min = Vector2.zero;
+						e.Use();
+						break;
+					case EventType.MouseDrag:
+						if (mouseDown && GUIUtility.hotControl == 0) {
+							GUIUtility.hotControl = id;
+							mouseDrag = true;
+						}
+						if (!mouseDown || GUIUtility.hotControl != id) {
+							break;
+						}
 						boundingRect.size = e.mousePosition - boundingRect.min;
 						if (boundingRect.size.x < 3 && boundingRect.size.y < 3) {
 							return;
 						}
-						GUIUtility.hotControl = id;
+						e.Use();
+						Rect absoluteRect = new Rect(Mathf.Min(boundingRect.min.x, boundingRect.min.x + boundingRect.size.x),
+							Mathf.Min(boundingRect.min.y, boundingRect.min.y + boundingRect.size.y),
+							Mathf.Abs(boundingRect.width),
+							Mathf.Abs(boundingRect.height));
+						var frustum = CameraUtility.GetCameraSubFrustumGUI(sceneView.camera, absoluteRect);
+						
+						// Find all the brushes (and it's gameObjects) that are in the frustum
+						if (SceneQueryUtility.GetItemsInFrustum(frustum.Planes, rectFoundGameObjects)) {
+							Selection.objects = rectFoundGameObjects.ToArray();
+						} else {
+							Selection.objects = null;
+						}
+						break;
+					case EventType.Repaint:
+						if (!mouseDrag) {
+							break;
+						}
+
 						Ray ray = HandleUtility.GUIPointToWorldRay( boundingRect.min );
 						Vector3 posA = ray.origin + ray.direction;
 						ray = HandleUtility.GUIPointToWorldRay( boundingRect.min + (boundingRect.width*Vector2.right) );
@@ -159,25 +201,7 @@ namespace RealtimeCSG
 						Handles.DrawDottedLine( posB, posC, 5 );
 						Handles.DrawDottedLine( posC, posD, 5 );
 						Handles.DrawDottedLine( posD, posA, 5 );
-						var frustum = CameraUtility.GetCameraSubFrustumGUI(sceneView.camera, boundingRect);
-						
-						// Find all the brushes (and it's gameObjects) that are in the frustum
-						if (SceneQueryUtility.GetItemsInFrustum(frustum.Planes, rectFoundGameObjects)) {
-							Selection.objects = rectFoundGameObjects.ToArray();
-						} else {
-							Selection.objects = null;
-						}
-					}
-					if( e.type == EventType.MouseUp ) {
-						if (GUIUtility.hotControl == id) {
-							GUIUtility.hotControl = 0;
-							e.Use();
-						}
-						boundingRect.min = Vector2.zero;
-					} else if( e.type == EventType.MouseDown ) {
-						boundingRect.min = e.mousePosition;
-						boundingRect.size = Vector2.zero;
-					}
+						break;
 				}
 				return;
 			}
