@@ -219,8 +219,6 @@ namespace RealtimeCSG
         static public uint					CurveSides				= 10;
         static public ClipMode              ClipMode                = ClipMode.RemovePositive;
         static public Material				DefaultMaterial			= MaterialUtility.WallMaterial;
-        static public string				DefaultShader			= "Standard";
-        static public string				MaterialDirectory	    = "Materials";
 
         const TexGenFlags                   defaultTextGenFlagsState = TexGenFlags.WorldSpaceTexture;
         static public TexGenFlags           DefaultTexGenFlags      = defaultTextGenFlagsState;
@@ -614,9 +612,8 @@ namespace RealtimeCSG
             EnableRealtimeCSG	= EditorPrefs.GetBool("EnableRealtimeCSG", true);
 
             DefaultMaterial		= GetMaterial("DefaultMaterial", MaterialUtility.WallMaterial);
-            MaterialDirectory   = EditorPrefs.GetString("MaterialDirectory", "Materials");
-            DefaultShader       = EditorPrefs.GetString("DefaultShader", "Standard");
-            
+
+
             SnapScale			= EditorPrefs.GetFloat("ScaleSnap", 0.1f);
             SnapRotation		= EditorPrefs.GetFloat("RotationSnap", 15.0f);
             DefaultShapeHeight	= EditorPrefs.GetFloat("DefaultShapeHeight", 1.0f);
@@ -753,9 +750,7 @@ namespace RealtimeCSG
 
             SetMaterial("DefaultMaterial", DefaultMaterial);
 
-            EditorPrefs.SetString("MaterialDirectory", MaterialDirectory);
-            EditorPrefs.SetString("DefaultShader", DefaultShader);
-            EditorPrefs.SetBool("ShowSceneInfo", ShowSceneInfo);
+            EditorPrefs.SetBool("ShowSceneInfo", RealtimeCSG.CSGSettings.ShowSceneInfo);
 
 
             var builder = new System.Text.StringBuilder();
