@@ -198,11 +198,11 @@ namespace RealtimeCSG
                 return;
             }
 
-            if( GraphicsSettings.renderPipelineAsset != null ) // if we are using any RP
+            if( GraphicsSettings.defaultRenderPipeline != null ) // if we are using any RP
             {
                 AssetDatabase.StartAssetEditing();
 
-                string pipelineShader = GraphicsSettings.renderPipelineAsset.defaultMaterial.shader.name;
+                string pipelineShader = GraphicsSettings.defaultRenderPipeline.defaultMaterial.shader.name;
 
                 material.shader = Shader.Find( pipelineShader );
 
@@ -272,9 +272,9 @@ namespace RealtimeCSG
             return Resources.Load<Material>( string.Format( "RealtimeCSG/Materials/{0}", materialName ) );
         }
 
-        internal static PhysicMaterial GetRuntimePhysicMaterial(string materialName)
+        internal static PhysicsMaterial GetRuntimePhysicMaterial(string materialName)
         {
-            return Resources.Load<PhysicMaterial>( string.Format( "RealtimeCSG/Materials/{0}", materialName ) );
+            return Resources.Load<PhysicsMaterial>( string.Format( "RealtimeCSG/Materials/{0}", materialName ) );
         }
 
         private static Material _defaultMaterial;
@@ -284,7 +284,7 @@ namespace RealtimeCSG
 			{
 				if (!_defaultMaterial)
 				{
-					var renderPipelineAsset = UnityEngine.Rendering.GraphicsSettings.renderPipelineAsset;
+					var renderPipelineAsset = UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline;
 					if (renderPipelineAsset)
 					{
 #if UNITY_2019_1_OR_NEWER
@@ -302,8 +302,8 @@ namespace RealtimeCSG
 			}
 		}
 
-        private static PhysicMaterial _defaultPhysicsMaterial;
-        public static PhysicMaterial DefaultPhysicsMaterial
+        private static PhysicsMaterial _defaultPhysicsMaterial;
+        public static PhysicsMaterial DefaultPhysicsMaterial
         {
             get
             {

@@ -29,6 +29,13 @@ namespace RealtimeCSG
                 EditorGUILayout.Space();
 
                 EditorGUILayout.LabelField("Surfaces", EditorStyles.boldLabel);
+                CSGSettings.MaterialDirectory = EditorGUILayout.TextField("Material Directory", CSGSettings.MaterialDirectory);
+                
+                EditorGUI.BeginChangeCheck();
+                var shader = EditorGUILayout.ObjectField("Default Shader", Shader.Find(CSGSettings.DefaultShader), typeof(Shader), false);
+                if (EditorGUI.EndChangeCheck())
+                    CSGSettings.DefaultShader = shader.name;
+                
                 var beforeToggleWorldSpaceTexture = (CSGSettings.DefaultTexGenFlags & TexGenFlags.WorldSpaceTexture) != TexGenFlags.WorldSpaceTexture;
                 var afterToggleWorldSpaceTexture = EditorGUILayout.ToggleLeft("Lock Texture To Object (Default)", beforeToggleWorldSpaceTexture);
                 if (afterToggleWorldSpaceTexture != beforeToggleWorldSpaceTexture)

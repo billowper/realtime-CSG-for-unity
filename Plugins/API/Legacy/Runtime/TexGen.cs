@@ -27,7 +27,7 @@ namespace RealtimeCSG.Legacy
         public Material			RenderMaterial;
         
         /// <value>[UnityEngine.PhysicMaterial](https://docs.unity3d.com/ScriptReference/PhysicMaterial.html) that is used by the polygons associated with this <see cref="TexGen"/> to generate [UnityEngine.Collider](https://docs.unity3d.com/ScriptReference/Collider.html) with</value>
-        public PhysicMaterial	PhysicsMaterial;
+        public PhysicsMaterial	PhysicsMaterial;
         
         /// <value><see cref="SmoothingGroup"/> used to smooth normals together</value>
         /// <remarks>All normals around a vertex are averaged for all surfaces that have the same <see cref="SmoothingGroup"/>. When <see cref="SmoothingGroup"/> is 0 no smoothing is applied.</remarks>
@@ -36,7 +36,7 @@ namespace RealtimeCSG.Legacy
         /// <summary>Constructor to generate <see cref="TexGen"/></summary>
         /// <param name="renderMaterial">[UnityEngine.Material](https://docs.unity3d.com/ScriptReference/Material.html) to use with this <see cref="TexGen"/></param>
         /// <param name="physicsMaterial">[UnityEngine.PhysicMaterial](https://docs.unity3d.com/ScriptReference/PhysicMaterial.html) to use with this <see cref="TexGen"/></param>
-        public TexGen(Material renderMaterial = null, PhysicMaterial physicsMaterial = null)
+        public TexGen(Material renderMaterial = null, PhysicsMaterial physicsMaterial = null)
         {
             Translation			= MathConstants.zeroVector3;
             Scale				= MathConstants.oneVector3;

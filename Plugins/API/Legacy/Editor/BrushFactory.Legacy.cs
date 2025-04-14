@@ -307,7 +307,7 @@ namespace RealtimeCSG.Legacy
         /// <param name="controlMesh">A legacy <see cref="RealtimeCSG.Legacy.ControlMesh"/> that describes the shape of the <see cref="RealtimeCSG.Foundation.BrushMesh"/>.</param>
         /// <param name="shape">A legacy <see cref="RealtimeCSG.Legacy.Shape"/> that describes the surfaces in the <see cref="RealtimeCSG.Foundation.BrushMesh"/>.</param>
         /// <returns>A new <see cref="RealtimeCSG.Foundation.BrushMesh"/></returns>
-        public static BrushMesh GenerateFromControlMesh(ControlMesh controlMesh, Shape shape, PhysicMaterial defaultPhysicsMaterial = null)
+        public static BrushMesh GenerateFromControlMesh(ControlMesh controlMesh, Shape shape, PhysicsMaterial defaultPhysicsMaterial = null)
         {
             if (controlMesh == null ||
                 shape == null)

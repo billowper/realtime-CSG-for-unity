@@ -542,7 +542,7 @@ namespace RealtimeCSG
                                 EditorGUI.showMixedValue = defaultPhysicsMaterialMixed;
                                 GUILayout.BeginHorizontal();
                                 EditorGUILayout.PrefixLabel(DefaultPhysicsMaterialContent);
-                                defaultPhysicsMaterial = EditorGUILayout.ObjectField(defaultPhysicsMaterial, typeof(PhysicMaterial), true) as PhysicMaterial;
+                                defaultPhysicsMaterial = EditorGUILayout.ObjectField(defaultPhysicsMaterial, typeof(PhysicsMaterial), true) as PhysicsMaterial;
                                 GUILayout.EndHorizontal();
                             }
                             if (EditorGUI.EndChangeCheck())
@@ -1284,7 +1284,7 @@ namespace RealtimeCSG
                                             switch (meshDescription.meshQuery.LayerParameterIndex)
                                             {
                                                 case LayerParameterIndex.LayerParameter1: { instance.RenderMaterial	 = obj as Material;       break; }
-                                                case LayerParameterIndex.LayerParameter2: { instance.PhysicsMaterial = obj as PhysicMaterial; break; }
+                                                case LayerParameterIndex.LayerParameter2: { instance.PhysicsMaterial = obj as PhysicsMaterial; break; }
                                             }
                                         }
                                     }

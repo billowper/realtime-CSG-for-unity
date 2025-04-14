@@ -123,7 +123,7 @@ namespace InternalRealtimeCSG
 #if UNITY_EDITOR
 		public Mesh					SharedMesh;
 		public Material				RenderMaterial;
-		public PhysicMaterial		PhysicsMaterial;
+		public PhysicsMaterial		PhysicsMaterial;
 		public RenderSurfaceType	RenderSurfaceType = (RenderSurfaceType)999;
 
 		public GeneratedMeshDescription MeshDescription;
