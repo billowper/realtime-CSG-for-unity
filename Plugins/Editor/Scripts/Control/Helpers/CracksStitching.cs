@@ -499,7 +499,7 @@ namespace RealtimeCSG
                     var jobWorkAround = new AsyncJobWorkaround();
                     EditorApplication.update += jobWorkAround.Post = () =>
                     {
-                        if (combinedMesh)
+                        if (!combinedMesh)
                             return;
 
                         EditorApplication.update -= jobWorkAround.Post;
