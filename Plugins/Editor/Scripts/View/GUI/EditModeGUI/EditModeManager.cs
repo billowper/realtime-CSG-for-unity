@@ -12,6 +12,19 @@ namespace RealtimeCSG
 {
 	internal sealed class EditModeManager : ScriptableObject
 	{
+		[InitializeOnLoadMethod]
+		private static void Init()
+		{
+			SceneVisibilityManager.visibilityChanged -= OnSceneVisChange;
+			SceneVisibilityManager.visibilityChanged += OnSceneVisChange;
+		}
+
+		private static void OnSceneVisChange()
+		{
+			if (instance.activeTool is BaseEditMode baseEditMode)
+				baseEditMode.OnForceRenderUpdate();
+		}
+
 		static EditModeManager instance = null;
 		
 		[NonSerialized ] bool				generateMode			= false;		
@@ -62,8 +75,8 @@ namespace RealtimeCSG
 				instance.editMode = value;
 				instance.generateMode = false; 
 				
-				RealtimeCSG.CSGSettings.EditMode = instance.editMode;
-				RealtimeCSG.CSGSettings.Save();
+				CSGSettings.EditMode = instance.editMode;
+				CSGSettings.Save();
 
 				if (ActiveTool != null)
 					CSG_EditorGUIUtility.RepaintAll();
@@ -115,7 +128,7 @@ namespace RealtimeCSG
 			var managers = Resources.FindObjectsOfTypeAll<EditModeManager>().ToArray();
 			for (int i = 0; i < managers.Length; i++)
 				DestroyImmediate(managers[i]);
-			instance = ScriptableObject.CreateInstance<EditModeManager>();
+			instance = CreateInstance<EditModeManager>();
 			instance.hideFlags = scriptableObjectHideflags;
 
 			var types = new Type[]
@@ -138,7 +151,7 @@ namespace RealtimeCSG
 				for (int i = 0; i < objects.Length; i++)
 					DestroyImmediate(objects[i]);
 
-				var obj = ScriptableObject.CreateInstance(types[j]);
+				var obj = CreateInstance(types[j]);
 				brushTools[j] = obj as IEditMode;
 				if (brushTools[j] == null)
 				{
@@ -158,10 +171,10 @@ namespace RealtimeCSG
 			EditModeGenerate.ShapeCancelled -= OnShapeCancelledEvent;
 			EditModeGenerate.ShapeCancelled += OnShapeCancelledEvent;
 			
-			RealtimeCSG.CSGSettings.Reload();
-			instance.editMode = RealtimeCSG.CSGSettings.EditMode;
+			CSGSettings.Reload();
+			instance.editMode = CSGSettings.EditMode;
 
-			EditModeManager.UpdateSelection(true); 
+			UpdateSelection(true); 
 			InitTargets();
 		}
 				
@@ -239,7 +252,7 @@ namespace RealtimeCSG
 				instance.activeTool.UndoRedoPerformed();
 			}
 
-			EditModeManager.UpdateSelection(forceUpdate: true);
+			UpdateSelection(forceUpdate: true);
 		}
 
 		static void OnModifierKeysChanged()
@@ -317,7 +330,7 @@ namespace RealtimeCSG
 				return;
 
             IEditMode newTool;
-            if (!RealtimeCSG.CSGSettings.EnableRealtimeCSG)
+            if (!CSGSettings.EnableRealtimeCSG)
                 newTool = null;
             else
                 newTool = CurrentTool;
@@ -342,7 +355,7 @@ namespace RealtimeCSG
 		{
 			snappedOnBrush = null;
             // Note: relative snapping wouldn't make sense here since it's a single point that's being snapped and there is no relative movement
-			var activeSnappingMode = RealtimeCSG.CSGSettings.ActiveSnappingMode;
+			var activeSnappingMode = CSGSettings.ActiveSnappingMode;
 			 
 			var snappedPoint = point;
             switch(activeSnappingMode)
@@ -350,12 +363,12 @@ namespace RealtimeCSG
                 case SnapMode.RelativeSnapping: // TODO: fixme
                 case SnapMode.GridSnapping:
 			    {
-				    snappedPoint = snappedPoint + RealtimeCSG.CSGGrid.ForceSnapDeltaToGrid(camera, MathConstants.zeroVector3, snappedPoint);
-				    snappedPoint = RealtimeCSG.CSGGrid.PointFromGridSpace(RealtimeCSG.CSGGrid.CubeProject(camera, RealtimeCSG.CSGGrid.PlaneToGridSpace(plane), RealtimeCSG.CSGGrid.PointToGridSpace(snappedPoint)));
+				    snappedPoint = snappedPoint + CSGGrid.ForceSnapDeltaToGrid(camera, MathConstants.zeroVector3, snappedPoint);
+				    snappedPoint = CSGGrid.PointFromGridSpace(CSGGrid.CubeProject(camera, CSGGrid.PlaneToGridSpace(plane), CSGGrid.PointToGridSpace(snappedPoint)));
 
 				    // snap twice to get rid of some tiny movements caused by the projection in depth	
-				    snappedPoint = snappedPoint + RealtimeCSG.CSGGrid.ForceSnapDeltaToGrid(camera, MathConstants.zeroVector3, snappedPoint);
-				    snappedPoint = RealtimeCSG.CSGGrid.PointFromGridSpace(RealtimeCSG.CSGGrid.CubeProject(camera, RealtimeCSG.CSGGrid.PlaneToGridSpace(plane), RealtimeCSG.CSGGrid.PointToGridSpace(snappedPoint)));
+				    snappedPoint = snappedPoint + CSGGrid.ForceSnapDeltaToGrid(camera, MathConstants.zeroVector3, snappedPoint);
+				    snappedPoint = CSGGrid.PointFromGridSpace(CSGGrid.CubeProject(camera, CSGGrid.PlaneToGridSpace(plane), CSGGrid.PointToGridSpace(snappedPoint)));
 
                     if (!ignoreAllBrushes)
                         return GridUtility.SnapToWorld(camera, plane, point, snappedPoint, ref snappingEdges, out snappedOnBrush, ignoreBrushes);
@@ -379,10 +392,10 @@ namespace RealtimeCSG
 			
 			snappingEdges = null;
             // Note: relative snapping wouldn't make sense here since it's a single point that's being snapped and there is no relative movement
-            var doGridSnapping	= RealtimeCSG.CSGSettings.ActiveSnappingMode != SnapMode.None;
+            var doGridSnapping	= CSGSettings.ActiveSnappingMode != SnapMode.None;
 			if (doGridSnapping)
 			{
-				var delta = RealtimeCSG.CSGGrid.ForceSnapDeltaToRay(camera, ray, MathConstants.zeroVector3, snappedPoint);
+				var delta = CSGGrid.ForceSnapDeltaToRay(camera, ray, MathConstants.zeroVector3, snappedPoint);
 				snappedPoint = snappedPoint + delta;
 			}
 			return snappedPoint;
@@ -404,10 +417,10 @@ namespace RealtimeCSG
 		
 		static bool HandleBuilderEvents()
 		{
-			if (RealtimeCSG.CSGSettings.EditMode != instance.editMode)
+			if (CSGSettings.EditMode != instance.editMode)
 			{
-				RealtimeCSG.CSGSettings.EditMode = instance.editMode;
-				RealtimeCSG.CSGSettings.Save();
+				CSGSettings.EditMode = instance.editMode;
+				CSGSettings.Save();
 			}
 			
 			switch (Event.current.type) 
@@ -532,7 +545,7 @@ namespace RealtimeCSG
 				
 				if (instance.activeTool != null)
 				{
-					if (RealtimeCSG.CSGSettings.EnableRealtimeCSG)
+					if (CSGSettings.EnableRealtimeCSG)
 					{
 						// handle the tool
                         var sceneSize = sceneView.position.size;
@@ -557,6 +570,9 @@ namespace RealtimeCSG
 								if (brush.ChildData == null ||
 									!brush.ChildData.Model)
 									continue;
+								
+								if (SceneVisibilityManager.instance.IsHidden(brush.gameObject))
+								    continue;
 
 								var brushTransformation = brush.compareTransformation.localToWorldMatrix;
 
@@ -596,7 +612,7 @@ namespace RealtimeCSG
 				SceneDragToolManager.IsDraggingObjectInScene = false;
 			}
 
-			if (RealtimeCSG.CSGSettings.EnableRealtimeCSG)
+			if (CSGSettings.EnableRealtimeCSG)
 			{
 				if (sceneView && sceneWindowType != EventType.Used && 
 					(!SceneDragToolManager.IsDraggingObjectInScene || EditMode == ToolEditMode.Surfaces))
@@ -621,7 +637,7 @@ namespace RealtimeCSG
 
 		public static void GenerateFromSurface(Camera camera, CSGBrush cSGBrush, CSGPlane polygonPlane, Vector3 direction, Vector3[] points, int[] pointIndices, uint[] smoothingGroups, bool drag, CSGOperationType forceDragSource, bool autoCommitExtrusion)
 		{
-			EditModeManager.EditMode = ToolEditMode.Generate;
+			EditMode = ToolEditMode.Generate;
 			UpdateTool();
 			var generateBrushTool = brushTools[(int)ToolEditMode.Generate] as EditModeGenerate;
 			generateBrushTool.GenerateFromPolygon(camera, cSGBrush, polygonPlane, direction, points, pointIndices, smoothingGroups, drag, forceDragSource, autoCommitExtrusion);

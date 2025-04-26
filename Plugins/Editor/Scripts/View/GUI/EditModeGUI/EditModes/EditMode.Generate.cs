@@ -21,7 +21,7 @@ namespace RealtimeCSG
 		Last = LinearStairs
 	}
 
-	internal sealed class EditModeGenerate : ScriptableObject, IEditMode
+	internal sealed class EditModeGenerate : BaseEditMode, IEditMode
 	{
 		public bool UsesUnitySelection	{ get { return false; } }
 		public bool IgnoreUnityRect		{ get { return true; } }
@@ -251,6 +251,7 @@ namespace RealtimeCSG
 		LineMeshManager zTestLineMeshManager = new LineMeshManager();
 		LineMeshManager noZTestLineMeshManager = new LineMeshManager();
 		int lastLineMeshGeneration = -1;
+		private bool forceRenderUpdate;
 
 
 		public void HandleEvents(SceneView sceneView, Rect sceneRect)
@@ -293,9 +294,10 @@ namespace RealtimeCSG
 
 				case EventType.Repaint:
 				{
-					if (lastLineMeshGeneration != InternalCSGModelManager.MeshGeneration)
+					if (forceRenderUpdate ||lastLineMeshGeneration != InternalCSGModelManager.MeshGeneration)
 					{
 						lastLineMeshGeneration = InternalCSGModelManager.MeshGeneration;
+						forceRenderUpdate = false;
 
 						var brushTransformation	= new Matrix4x4[brushes.Length];
 						var brushNodeIDs		= new Int32[brushes.Length];
@@ -350,6 +352,11 @@ namespace RealtimeCSG
 		{
 			BuilderMode = ShapeMode.FreeDraw;
 			freedrawGenerator.GenerateFromPolygon(camera, brush, plane, direction, meshVertices, indices, smoothingGroups, drag, forceDragSource, autoCommitExtrusion);
+		}
+
+		public override void OnForceRenderUpdate()
+		{
+			forceRenderUpdate = true;
 		}
 	}
 }

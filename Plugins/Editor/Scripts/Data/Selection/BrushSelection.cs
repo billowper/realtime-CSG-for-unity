@@ -134,6 +134,9 @@ namespace InternalRealtimeCSG
                 if (!Brushes[i] ||
 					Brushes[i].ControlMesh == null)
                     continue;
+                
+                if (SceneVisibilityManager.instance.IsHidden(Brushes[i].gameObject))
+	                continue;
 
                 if (!Brushes[i].ControlMesh.Valid)
                     Brushes[i].ControlMesh.Valid = ControlMeshUtility.Validate(Brushes[i].ControlMesh, Brushes[i].Shape);
@@ -163,11 +166,13 @@ namespace InternalRealtimeCSG
                 if (Brushes[i].ChildData == null ||
                     Brushes[i].ChildData.ModelTransform == null)
                     continue;
+                
+                if (SceneVisibilityManager.instance.IsHidden(ModelTransforms[i].gameObject))
+	                continue;
 
                 ModelTransforms[i] = Brushes[i].ChildData.ModelTransform;
             }
         }
-
 
         public void BackupSelection()
         {

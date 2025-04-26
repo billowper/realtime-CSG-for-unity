@@ -1,15 +1,13 @@
 ﻿using UnityEngine;
-using UnityEditor;
 using System.Collections.Generic;
-using System;
 using InternalRealtimeCSG;
 using System.Linq;
 
 namespace RealtimeCSG
 {
-	sealed class LineMeshManager
+	internal sealed class LineMeshManager
 	{
-		sealed class LineMesh
+		private sealed class LineMesh
 		{
 			public const int MaxVertexCount = 65000 - 4;
 
@@ -20,12 +18,12 @@ namespace RealtimeCSG
 			public Vector4[]	offsets		= new Vector4[MaxVertexCount];
 			public Color[]		colors		= new Color[MaxVertexCount];
 			public int			vertexCount	= 0;
-			int[]				indices     = null;
-		
-			Mesh mesh;
 
-			public LineMesh() { Clear(); }
-		
+			public LineMesh()
+			{
+				Clear();
+			}
+
 			public void Clear()
 			{
 				vertexCount	= 0;
@@ -47,10 +45,13 @@ namespace RealtimeCSG
 				vertexCount = n;
 			}
 			
-			public List<Vector3>	newVertices1	= new List<Vector3>(MaxVertexCount);
-			public List<Vector3>	newVertices2	= new List<Vector3>(MaxVertexCount);
-			public List<Vector4>	newOffsets		= new List<Vector4>(MaxVertexCount);
-			public List<Color>		newColors		= new List<Color>(MaxVertexCount);
+			private int[]				indices     = null;
+			private Mesh mesh;
+
+			private List<Vector3>	newVertices1	= new List<Vector3>(MaxVertexCount);
+			private List<Vector3>	newVertices2	= new List<Vector3>(MaxVertexCount);
+			private List<Vector4>	newOffsets		= new List<Vector4>(MaxVertexCount);
+			private List<Color>		newColors		= new List<Color>(MaxVertexCount);
 
 			public void CommitMesh()
 			{
@@ -66,16 +67,17 @@ namespace RealtimeCSG
 				if (mesh)
 				{
 					mesh.Clear(true);
-				} else
+				}
+				else
 				{
 					mesh = new Mesh();
 					mesh.hideFlags = HideFlags.HideAndDontSave | HideFlags.DontUnloadUnusedAsset;
 					mesh.MarkDynamic();
 				}
 
-				int req_size = vertexCount * 6 / 4;
-				if (indices == null || indices.Length != req_size)
-					indices = new int[req_size];
+				int reqSize = vertexCount * 6 / 4;
+				if (indices == null || indices.Length != reqSize)
+					indices = new int[reqSize];
 
 				for (int i = 0, j = 0; i < vertexCount; i += 4, j += 6)
 				{
@@ -83,24 +85,46 @@ namespace RealtimeCSG
 					indices[j + 3] = i + 0; indices[j + 4] = i + 2; indices[j + 5] = i + 3;
 				}
 				
+				newVertices1.Capacity = Mathf.Max(newVertices1.Capacity, vertexCount);
+				newVertices2.Capacity = Mathf.Max(newVertices2.Capacity, vertexCount);
+				newOffsets.Capacity = Mathf.Max(newOffsets.Capacity, vertexCount);
+				newColors.Capacity = Mathf.Max(newColors.Capacity, vertexCount);
+
+				// Assuming vertexCount is valid and within bounds of source collections
+				for (int i = 0; i < vertexCount; i++)
+				{
+					// Add bounds checking here if vertexCount could exceed source lengths!
+					// e.g., if (i >= vertices1.Count) break; // Or handle differently
+
+					newVertices1.Add(vertices1[i]);
+					newVertices2.Add(vertices2[i]);
+					newOffsets.Add(offsets[i]);
+					newColors.Add(colors[i]);
+				}
+
+				
 				// thanks unity API
+				/*
 				newVertices1.Clear();
 				newVertices2.Clear();
 				newOffsets  .Clear();
 				newColors   .Clear();
+				
 				if (vertexCount == MaxVertexCount)
 				{
 					newVertices1.AddRange(vertices1);
 					newVertices2.AddRange(vertices2);
 					newOffsets  .AddRange(offsets);
 					newColors   .AddRange(colors);
-				} else
-				{ 
-					newVertices1.AddRange(vertices1.Take(vertexCount)); 
-					newVertices2.AddRange(vertices2.Take(vertexCount));
-					newOffsets  .AddRange(offsets.Take(vertexCount));
-					newColors   .AddRange(colors.Take(vertexCount));
 				}
+				else
+				{
+					newVertices1.AddRange(vertices1.Take(vertexCount));
+					newVertices2.AddRange(vertices2.Take(vertexCount));
+					newOffsets.AddRange(offsets.Take(vertexCount));
+					newColors.AddRange(colors.Take(vertexCount));
+				}
+				*/
 
 				mesh.SetVertices(newVertices1);
 				mesh.SetUVs(0, newVertices2);
@@ -157,8 +181,8 @@ namespace RealtimeCSG
 			}
 		}
 
-		List<LineMesh> lineMeshes = new List<LineMesh>();
-		int currentLineMesh = 0;
+		private List<LineMesh> lineMeshes = new List<LineMesh>();
+		private int currentLineMesh = 0;
 		
 		public LineMeshManager()
 		{
@@ -410,8 +434,6 @@ namespace RealtimeCSG
 			}
 			currentLineMesh = lineMeshIndex;
 		}
-
-
 
 		public void DrawLines(Matrix4x4 matrix, Vector3[] vertices, int[] indices, Color[] colors, float thickness = 1.0f, float dashSize = 0.0f)
 		{

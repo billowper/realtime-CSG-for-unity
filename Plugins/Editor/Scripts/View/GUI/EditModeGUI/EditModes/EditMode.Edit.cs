@@ -10,7 +10,7 @@ using RealtimeCSG.Foundation;
 
 namespace RealtimeCSG
 {
-	internal sealed class EditModeMeshEdit : ScriptableObject, IEditMode
+	internal sealed class EditModeMeshEdit : BaseEditMode, IEditMode
 	{
 		private static readonly int RectSelectionHash			= "vertexRectSelection".GetHashCode();
 		private static readonly int meshEdgeChamferHash			= "meshEdgeChamfer".GetHashCode();
@@ -3345,41 +3345,8 @@ namespace RealtimeCSG
 			}
 		}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		[SerializeField] Vector2 scrollPos;
 		
-		static Vector2 scrollPos;
 		public void OnInspectorGUI(EditorWindow window, float height)
 		{
 			scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
@@ -3401,6 +3368,11 @@ namespace RealtimeCSG
 
 			EditModeMeshModeGUI.OnSceneGUI(windowRect, this);
 			return true;
+		}
+
+		public override void OnForceRenderUpdate()
+		{
+			ForceLineUpdate();
 		}
 	}
 }

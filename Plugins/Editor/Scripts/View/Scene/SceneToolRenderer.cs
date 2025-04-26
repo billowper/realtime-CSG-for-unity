@@ -9,59 +9,86 @@ namespace RealtimeCSG
 {
 	internal static class SceneToolRenderer
 	{
-		static int meshGeneration = -1;
+		[InitializeOnLoadMethod]
+		private static void Init()
+		{
+			SceneVisibilityManager.visibilityChanged -= OnSceneVisChange;
+			SceneVisibilityManager.visibilityChanged += OnSceneVisChange;
+		}
 
-		static LineMeshManager lineMeshManager = new LineMeshManager();
+		private static int _meshGeneration = -1;
+		private static readonly LineMeshManager _lineMeshManager = new();
+		private static bool _forceOutlineUpdate;
+		
+		private static void OnSceneVisChange()
+		{
+			SetOutlineDirty();
+		}
 
 		internal static void Cleanup()
 		{
-			meshGeneration = -1;
-			lineMeshManager.Destroy();
+			_meshGeneration = -1;
+			_lineMeshManager.Destroy();
 		}
 
-		static bool forceOutlineUpdate = false;
-		internal static void SetOutlineDirty() { forceOutlineUpdate = false; }
+		internal static void SetOutlineDirty() { _forceOutlineUpdate = true; }
 		
 		internal static void OnPaint(SceneView sceneView)
         {
             if (!sceneView)
-                return;
+            {
+	            return;
+            }
 
             var camera = sceneView.camera;
+            
 			SceneDragToolManager.OnPaint(camera);
 
 			if (Event.current.type != EventType.Repaint)
-				return;
-
-            if (RealtimeCSG.CSGSettings.GridVisible)
-				RealtimeCSG.CSGGrid.RenderGrid(camera);
-			
-			if (RealtimeCSG.CSGSettings.IsWireframeShown(sceneView))
 			{
-				if (forceOutlineUpdate || meshGeneration != InternalCSGModelManager.MeshGeneration)
+				return;
+			}
+
+			if (CSGSettings.GridVisible)
+			{
+				CSGGrid.RenderGrid(camera);
+			}
+
+			if (CSGSettings.IsWireframeShown(sceneView))
+			{
+				if (_forceOutlineUpdate || _meshGeneration != InternalCSGModelManager.MeshGeneration)
 				{
-					forceOutlineUpdate = false;
-					meshGeneration = InternalCSGModelManager.MeshGeneration;
-					lineMeshManager.Begin();
+					_forceOutlineUpdate = false;
+					_meshGeneration = InternalCSGModelManager.MeshGeneration;
+					_lineMeshManager.Begin();
 					for (int i = 0; i < InternalCSGModelManager.Brushes.Count; i++)
 					{
 						var brush = InternalCSGModelManager.Brushes[i];
 						if (!brush)
+						{
 							continue;
+						}
+
+						if (SceneVisibilityManager.instance.IsHidden(brush.gameObject))
+						{
+							continue;
+						}
 
 						if (!brush.outlineColor.HasValue)
+						{
 							brush.outlineColor = ColorSettings.GetBrushOutlineColor(brush);
-						
+						}
+
 						var brush_transformation = brush.compareTransformation.localToWorldMatrix;
-						CSGRenderer.DrawSimpleOutlines(lineMeshManager, brush.brushNodeID, brush_transformation, brush.outlineColor.Value);
+						CSGRenderer.DrawSimpleOutlines(_lineMeshManager, brush.brushNodeID, brush_transformation, brush.outlineColor.Value);
 					}
-					lineMeshManager.End();
+					_lineMeshManager.End();
 				}
 
 				MaterialUtility.LineDashMultiplier = 1.0f;
 				MaterialUtility.LineThicknessMultiplier = 1.0f;
 				MaterialUtility.LineAlphaMultiplier = 1.0f;
-				lineMeshManager.Render(MaterialUtility.NoZTestGenericLine);
+				_lineMeshManager.Render(MaterialUtility.NoZTestGenericLine);
 			}
 		}
 	}

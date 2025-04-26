@@ -294,11 +294,17 @@ namespace RealtimeCSG
                 return CSGPrefabUtility.IsEditedInPrefabMode(model);
             }
 #endif
+            if (SceneVisibilityManager.instance.IsHidden(model.gameObject))
+                return false;
+            
             return model.isActiveAndEnabled;
         }
 
         public static bool IsModelSelectable(CSGModel model)
         {
+            if (SceneVisibilityManager.instance.IsHidden(model.gameObject))
+                return false;
+            
             if (!model || !model.isActiveAndEnabled)
                 return false;
             if (((1 << model.gameObject.layer) & Tools.visibleLayers) == 0)

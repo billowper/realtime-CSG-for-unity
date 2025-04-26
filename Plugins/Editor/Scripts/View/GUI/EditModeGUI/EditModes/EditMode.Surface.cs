@@ -10,7 +10,7 @@ using RealtimeCSG.Components;
 
 namespace RealtimeCSG
 {
-    internal sealed class EditModeSurface : ScriptableObject, IEditMode
+    internal sealed class EditModeSurface : BaseEditMode, IEditMode
     {
         static readonly int surfaceSelectPaintControlToolHash	= "surfaceSelectPaintControl".GetHashCode();
         static readonly int textureCopyDragControlToolHash		= "textureCopyDragControl".GetHashCode();
@@ -1609,6 +1609,11 @@ namespace RealtimeCSG
             
             EditModeSurfaceGUI.OnSceneGUI(windowRect, this);
             return true;
+        }
+
+        public override void OnForceRenderUpdate()
+        {
+            forceOutlineUpdate = true;
         }
     }
 }

@@ -499,11 +499,14 @@ namespace RealtimeCSG
                     var jobWorkAround = new AsyncJobWorkaround();
                     EditorApplication.update += jobWorkAround.Post = () =>
                     {
-                        EditorApplication.update -= jobWorkAround.Post;
-                        if(cancellationToken.IsCancellationRequested)
+                        if (combinedMesh)
                             return;
-            
-                        if(totalIndices > ushort.MaxValue)
+
+                        EditorApplication.update -= jobWorkAround.Post;
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
+                        if (totalIndices > ushort.MaxValue)
                             combinedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 
                         for (int i = 0; i < subMeshes.Length; i++)
@@ -514,7 +517,7 @@ namespace RealtimeCSG
                         foreach (var mesh1 in pMesh)
                         {
                             var ci = new CombineInstance[mesh1.subMeshCount];
-                            mesh1.Clear(); 
+                            mesh1.Clear();
                             for (int i = 0; i < ci.Length; i++)
                                 ci[i] = new CombineInstance { mesh = combinedMesh, subMeshIndex = submeshIndex++ };
                             mesh1.CombineMeshes(ci, false, false);

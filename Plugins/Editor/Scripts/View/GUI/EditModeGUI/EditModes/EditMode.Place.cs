@@ -9,7 +9,7 @@ using RealtimeCSG.Components;
 
 namespace RealtimeCSG
 {
-	internal sealed class EditModePlace : ScriptableObject, IEditMode
+	internal sealed class EditModePlace : BaseEditMode, IEditMode
 	{
 		public bool	UsesUnitySelection	{ get { return true; } }
 		public bool IgnoreUnityRect		{ get { return false; } }
@@ -2677,6 +2677,11 @@ namespace RealtimeCSG
 			
 			EditmodePlaceGUI.OnSceneGUI(windowRect, this);
 			return false;
+		}
+
+		public override void OnForceRenderUpdate()
+		{
+			
 		}
 	}
 }

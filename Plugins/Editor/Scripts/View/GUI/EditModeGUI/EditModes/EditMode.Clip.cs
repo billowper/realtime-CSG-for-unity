@@ -24,7 +24,7 @@ namespace RealtimeCSG
 		public bool					removeOnCommit;
 	}
 	
-	internal sealed class EditModeClip : ScriptableObject, IEditMode
+	internal sealed class EditModeClip : BaseEditMode, IEditMode
 	{
 		public bool UsesUnitySelection	{ get { return false; } }
 		public bool IgnoreUnityRect		{ get { return true; } }
@@ -1678,6 +1678,11 @@ namespace RealtimeCSG
 
 			EditModeClipGUI.OnSceneGUI(windowRect, this);
 			return true;
+		}
+
+		public override void OnForceRenderUpdate()
+		{
+			forceWireframeUpdate = true;
 		}
 	}
 }
