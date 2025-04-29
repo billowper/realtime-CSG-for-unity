@@ -167,9 +167,6 @@ namespace InternalRealtimeCSG
                     Brushes[i].ChildData.ModelTransform == null)
                     continue;
                 
-                if (SceneVisibilityManager.instance.IsHidden(ModelTransforms[i].gameObject))
-	                continue;
-
                 ModelTransforms[i] = Brushes[i].ChildData.ModelTransform;
             }
         }
